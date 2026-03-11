@@ -2,23 +2,23 @@
 #
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║                                                                           ║
-# ║   🦞 OpenClaw 一键部署脚本 v1.0.0                                          ║
-# ║   智能 AI 助手部署工具 - 支持多平台多模型                                    ║
+# ║   🦞 OpenClaw 一鍵部署腳本 v1.0.0                                          ║
+# ║   智慧 AI 助手部署工具 - 支援多平台多模型                                    ║
 # ║                                                                           ║
 # ║   GitHub: https://github.com/miaoxworld/OpenClawInstaller                 ║
-# ║   官方文档: https://clawd.bot/docs                                         ║
+# ║   官方檔案: https://clawd.bot/docs                                         ║
 # ║                                                                           ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 #
 # 使用方法:
 #   curl -fsSL https://raw.githubusercontent.com/miaoxworld/OpenClawInstaller/main/install.sh | bash
-#   或本地执行: chmod +x install.sh && ./install.sh
+#   或本機執行: chmod +x install.sh && ./install.sh
 #
 
 set -e
 
-# ================================ TTY 检测 ================================
-# 当通过 curl | bash 运行时，stdin 是管道，需要从 /dev/tty 读取用户输入
+# ================================ TTY 檢測 ================================
+# 當透過 curl | bash 執行時，stdin 是管線，需要從 /dev/tty 讀取用戶輸入
 if [ -t 0 ]; then
     # stdin 是终端
     TTY_INPUT="/dev/stdin"
@@ -27,7 +27,7 @@ else
     TTY_INPUT="/dev/tty"
 fi
 
-# ================================ 颜色定义 ================================
+# ================================ 顏色定義 ================================
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -36,9 +36,9 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 WHITE='\033[1;37m'
 GRAY='\033[0;90m'
-NC='\033[0m' # 无颜色
+NC='\033[0m' # 無顏色
 
-# ================================ 配置变量 ================================
+# ================================ 配置變數 ================================
 OPENCLAW_VERSION="latest"
 CONFIG_DIR="$HOME/.openclaw"
 MIN_NODE_VERSION=22
@@ -58,7 +58,7 @@ print_banner() {
     ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗███████╗██║  ██║╚███╔███╔╝
      ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝   
                                                                          
-              🦞 智能 AI 助手一键部署工具 v1.0.0 🦞
+               🦞 智慧 AI 助手一鍵部署工具 v1.0.0 🦞
     
 EOF
     echo -e "${NC}"
@@ -94,7 +94,7 @@ spinner() {
     printf "    \b\b\b\b"
 }
 
-# 从 TTY 读取用户输入（支持 curl | bash 模式）
+# 从 TTY 读取用戶輸入（支援 curl | bash 模式）
 read_input() {
     local prompt="$1"
     local var_name="$2"
@@ -122,10 +122,10 @@ confirm() {
     esac
 }
 
-# ================================ 系统检测 ================================
+# ================================ 系統檢測 ================================
 
 detect_os() {
-    log_step "检测操作系统..."
+    log_step "檢測作業系統..."
     
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [ -f /etc/os-release ]; then
@@ -143,31 +143,31 @@ detect_os() {
         elif command -v pacman &> /dev/null; then
             PACKAGE_MANAGER="pacman"
         fi
-        log_info "检测到 Linux 系统: $OS $OS_VERSION (包管理器: $PACKAGE_MANAGER)"
+        log_info "偵測到 Linux 系統: $OS $OS_VERSION (套件管理器: $PACKAGE_MANAGER)"
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         OS="macos"
         OS_VERSION=$(sw_vers -productVersion)
         PACKAGE_MANAGER="brew"
-        log_info "检测到 macOS 系统: $OS_VERSION"
+        log_info "偵測到 macOS 系統: $OS_VERSION"
     elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
         OS="windows"
-        log_info "检测到 Windows 系统 (Git Bash/Cygwin)"
+        log_info "偵測到 Windows 系統 (Git Bash/Cygwin)"
     else
-        log_error "不支持的操作系统: $OSTYPE"
+        log_error "不支援的作業系統: $OSTYPE"
         exit 1
     fi
 }
 
 check_root() {
     if [[ $EUID -eq 0 ]]; then
-        log_warn "检测到以 root 用户运行"
-        if ! confirm "建议使用普通用户运行，是否继续？" "n"; then
+        log_warn "檢測到以 root 用戶运行"
+        if ! confirm "建议使用普通用戶运行，是否继续？" "n"; then
             exit 1
         fi
     fi
 }
 
-# ================================ 依赖检查与安装 ================================
+# ================================ 依賴檢查与安裝 ================================
 
 check_command() {
     command -v "$1" &> /dev/null
@@ -175,7 +175,7 @@ check_command() {
 
 install_homebrew() {
     if ! check_command brew; then
-        log_step "安装 Homebrew..."
+        log_step "安裝 Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         
         # 添加到 PATH
@@ -188,7 +188,7 @@ install_homebrew() {
 }
 
 install_nodejs() {
-    log_step "检查 Node.js..."
+    log_step "檢查 Node.js..."
     
     if check_command node; then
         local node_version=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
@@ -200,7 +200,7 @@ install_nodejs() {
         fi
     fi
     
-    log_step "安装 Node.js $MIN_NODE_VERSION..."
+    log_step "安裝 Node.js $MIN_NODE_VERSION..."
     
     case "$OS" in
         macos)
@@ -220,17 +220,17 @@ install_nodejs() {
             sudo pacman -S nodejs npm --noconfirm
             ;;
         *)
-            log_error "无法自动安装 Node.js，请手动安装 v$MIN_NODE_VERSION+"
+            log_error "无法自動安裝 Node.js，请手动安裝 v$MIN_NODE_VERSION+"
             exit 1
             ;;
     esac
     
-    log_info "Node.js 安装完成: $(node -v)"
+    log_info "Node.js 安裝完成: $(node -v)"
 }
 
 install_git() {
     if ! check_command git; then
-        log_step "安装 Git..."
+        log_step "安裝 Git..."
         case "$OS" in
             macos)
                 install_homebrew
@@ -251,9 +251,9 @@ install_git() {
 }
 
 install_dependencies() {
-    log_step "检查并安装依赖..."
+    log_step "檢查并安裝依賴..."
     
-    # 安装基础依赖
+    # 安裝基础依賴
     case "$OS" in
         ubuntu|debian)
             sudo apt-get update
@@ -272,39 +272,39 @@ install_dependencies() {
     install_nodejs
 }
 
-# ================================ OpenClaw 安装 ================================
+# ================================ OpenClaw 安裝 ================================
 
 create_directories() {
-    log_step "创建配置目录..."
+    log_step "创建配置目錄..."
     
     mkdir -p "$CONFIG_DIR"
     
-    log_info "配置目录: $CONFIG_DIR"
+    log_info "配置目錄: $CONFIG_DIR"
 }
 
 install_openclaw() {
-    log_step "安装 OpenClaw..."
+    log_step "安裝 OpenClaw..."
     
-    # 检查是否已安装
+    # 檢查是否已安裝
     if check_command openclaw; then
         local current_version=$(openclaw --version 2>/dev/null || echo "unknown")
-        log_warn "OpenClaw 已安装 (版本: $current_version)"
-        if ! confirm "是否重新安装/更新？"; then
+        log_warn "OpenClaw 已安裝 (版本: $current_version)"
+        if ! confirm "是否重新安裝/更新？"; then
             init_openclaw_config
             return 0
         fi
     fi
     
-    # 使用 npm 全局安装
-    log_info "正在从 npm 安装 OpenClaw..."
+    # 使用 npm 全局安裝
+    log_info "正在从 npm 安裝 OpenClaw..."
     npm install -g openclaw@$OPENCLAW_VERSION --unsafe-perm
     
-    # 验证安装
+    # 验证安裝
     if check_command openclaw; then
-        log_info "OpenClaw 安装成功: $(openclaw --version 2>/dev/null || echo 'installed')"
+        log_info "OpenClaw 安裝成功: $(openclaw --version 2>/dev/null || echo 'installed')"
         init_openclaw_config
     else
-        log_error "OpenClaw 安装失败"
+        log_error "OpenClaw 安裝失败"
         exit 1
     fi
 }
@@ -315,7 +315,7 @@ init_openclaw_config() {
     
     local OPENCLAW_DIR="$HOME/.openclaw"
     
-    # 创建必要的目录
+    # 创建必要的目錄
     mkdir -p "$OPENCLAW_DIR/agents/main/sessions"
     mkdir -p "$OPENCLAW_DIR/agents/main/agent"
     mkdir -p "$OPENCLAW_DIR/credentials"
@@ -328,15 +328,15 @@ init_openclaw_config() {
         openclaw config set gateway.mode local 2>/dev/null || true
         log_info "Gateway 模式已设置为 local"
         
-        # 检查 gateway.auth 配置，如果是 token 模式但没有 token，则自动生成
+        # 檢查 gateway.auth 配置，如果是 token 模式但没有 token，则自動生成
         local auth_mode=$(openclaw config get gateway.auth 2>/dev/null)
         if [ "$auth_mode" = "token" ]; then
             local auth_token=$(openclaw config get gateway.auth.token 2>/dev/null)
             if [ -z "$auth_token" ] || [ "$auth_token" = "undefined" ]; then
-                # 自动生成一个随机 token
+                # 自動生成一个随机 token
                 local new_token=$(openssl rand -hex 32 2>/dev/null || cat /dev/urandom | head -c 32 | xxd -p 2>/dev/null || date +%s%N | sha256sum | head -c 64)
                 openclaw config set gateway.auth.token "$new_token" 2>/dev/null || true
-                log_info "已自动生成 Gateway Auth Token"
+                log_info "已自動生成 Gateway Auth Token"
             fi
         fi
     fi
@@ -349,13 +349,13 @@ configure_openclaw_model() {
     local env_file="$HOME/.openclaw/env"
     local openclaw_json="$HOME/.openclaw/openclaw.json"
     
-    # 创建环境变量文件
+    # 创建環境變數檔案
     cat > "$env_file" << EOF
-# OpenClaw 环境变量配置
-# 由安装脚本自动生成: $(date '+%Y-%m-%d %H:%M:%S')
+# OpenClaw 環境變數配置
+# 由安裝脚本自動生成: $(date '+%Y-%m-%d %H:%M:%S')
 EOF
 
-    # 根据 AI_PROVIDER 设置对应的环境变量
+    # 根据 AI_PROVIDER 设置对应的環境變數
     case "$AI_PROVIDER" in
         anthropic)
             echo "export ANTHROPIC_API_KEY=$AI_KEY" >> "$env_file"
@@ -395,7 +395,7 @@ EOF
     esac
     
     chmod 600 "$env_file"
-    log_info "环境变量配置已保存到: $env_file"
+    log_info "環境變數配置已保存到: $env_file"
     
     # 设置默认模型
     if check_command openclaw; then
@@ -439,10 +439,10 @@ EOF
         fi
         
         if [ -n "$openclaw_model" ]; then
-            # 加载环境变量
+            # 加载環境變數
             source "$env_file"
             
-            # 设置默认模型（显示错误信息以便调试）
+            # 设置默认模型（显示錯誤資訊以便调试）
             # 添加 || true 防止 set -e 导致脚本退出
             local set_result
             set_result=$(openclaw models set "$openclaw_model" 2>&1) || true
@@ -461,11 +461,11 @@ EOF
         fi
     fi
     
-    # 添加到 shell 配置文件
+    # 添加到 shell 配置檔案
     add_env_to_shell "$env_file"
 }
 
-# 配置自定义 provider（用于支持自定义 API 地址）
+# 配置自定义 provider（用于支援自定义 API 地址）
 # 参数: provider api_key model base_url config_file [api_type]
 configure_custom_provider() {
     local provider="$1"
@@ -493,12 +493,12 @@ configure_custom_provider() {
     
     log_step "配置自定义 Provider..."
     
-    # 确保配置目录存在
+    # 确保配置目錄存在
     local config_dir=$(dirname "$config_file")
     mkdir -p "$config_dir" 2>/dev/null || true
     
     # 确定 API 类型
-    # 如果传入了自定义 API 类型，使用传入的值；否则根据 provider 自动判断
+    # 如果传入了自定义 API 类型，使用传入的值；否则根据 provider 自動判断
     local api_type=""
     if [ -n "$custom_api_type" ]; then
         api_type="$custom_api_type"
@@ -509,10 +509,10 @@ configure_custom_provider() {
     fi
     local provider_id="${provider}-custom"
     
-    # 先检查是否存在旧的自定义配置，并询问是否清理
+    # 先檢查是否存在旧的自定义配置，并询问是否清理
     local do_cleanup="false"
     if [ -f "$config_file" ]; then
-        # 检查是否有旧的自定义 provider 配置
+        # 檢查是否有旧的自定义 provider 配置
         local has_old_config="false"
         if grep -q '"anthropic-custom"' "$config_file" 2>/dev/null || \
            grep -q '"openai-custom"' "$config_file" 2>/dev/null; then
@@ -543,7 +543,7 @@ try {
             fi
             echo ""
             echo -e "${YELLOW}是否清理旧的自定义配置？${NC}"
-            echo -e "${GRAY}(清理可避免配置累积，推荐选择 Y)${NC}"
+            echo -e "${GRAY}(清理可避免配置累积，推薦选择 Y)${NC}"
             if confirm "清理旧配置？" "y"; then
                 do_cleanup="true"
             fi
@@ -562,7 +562,7 @@ try {
     if command -v node &> /dev/null; then
         log_info "使用 node 配置自定义 Provider..."
         
-        # 将变量写入临时文件，避免 shell 转义问题
+        # 将變數写入临时檔案，避免 shell 转义问题
         local tmp_vars="/tmp/openclaw_provider_vars_$$.json"
         cat > "$tmp_vars" << EOFVARS
 {
@@ -591,7 +591,7 @@ try {
 if (!config.models) config.models = {};
 if (!config.models.providers) config.models.providers = {};
 
-// 根据用户选择决定是否清理旧配置
+// 根据用戶选择决定是否清理旧配置
 if (vars.do_cleanup === 'true') {
     delete config.models.providers['anthropic-custom'];
     delete config.models.providers['openai-custom'];
@@ -642,7 +642,7 @@ console.log('Custom provider configured: ' + vars.provider_id);
     if [ "$config_success" = false ] && command -v python3 &> /dev/null; then
         log_info "使用 python3 配置自定义 Provider..."
         
-        # 将变量写入临时文件，避免 shell 转义问题
+        # 将變數写入临时檔案，避免 shell 转义问题
         local tmp_vars="/tmp/openclaw_provider_vars_$$.json"
         cat > "$tmp_vars" << EOFVARS
 {
@@ -660,7 +660,7 @@ EOFVARS
 import json
 import os
 
-# 从临时文件读取变量
+# 从临时檔案读取變數
 with open('$tmp_vars', 'r') as f:
     vars = json.load(f)
 
@@ -678,7 +678,7 @@ if 'models' not in config:
 if 'providers' not in config['models']:
     config['models']['providers'] = {}
 
-# 根据用户选择决定是否清理旧配置
+# 根据用戶选择决定是否清理旧配置
 if vars['do_cleanup'] == 'true':
     config['models']['providers'].pop('anthropic-custom', None)
     config['models']['providers'].pop('openai-custom', None)
@@ -726,17 +726,17 @@ print('Custom provider configured: ' + vars['provider_id'])
         log_warn "无法配置自定义 Provider（需要 node 或 python3）"
     fi
     
-    # 验证配置文件是否正确写入
+    # 验证配置檔案是否正确写入
     if [ -f "$config_file" ]; then
         if grep -q "$provider_id" "$config_file" 2>/dev/null; then
-            log_info "配置文件验证通过: $config_file"
+            log_info "配置檔案验证通过: $config_file"
         else
-            log_warn "配置文件可能未正确写入，请检查: $config_file"
+            log_warn "配置檔案可能未正确写入，请檢查: $config_file"
         fi
     fi
 }
 
-# 添加环境变量到 shell 配置
+# 添加環境變數到 shell 配置
 add_env_to_shell() {
     local env_file="$1"
     local shell_rc=""
@@ -750,19 +750,19 @@ add_env_to_shell() {
     fi
     
     if [ -n "$shell_rc" ]; then
-        # 检查是否已添加
+        # 檢查是否已添加
         if ! grep -q "source.*openclaw/env" "$shell_rc" 2>/dev/null; then
             echo "" >> "$shell_rc"
-            echo "# OpenClaw 环境变量" >> "$shell_rc"
+            echo "# OpenClaw 環境變數" >> "$shell_rc"
             echo "[ -f \"$env_file\" ] && source \"$env_file\"" >> "$shell_rc"
-            log_info "环境变量已添加到: $shell_rc"
+            log_info "環境變數已添加到: $shell_rc"
         fi
     fi
 }
 
 # ================================ 配置向导 ================================
 
-# create_default_config 已移除 - OpenClaw 使用 openclaw.json 和环境变量
+# create_default_config 已移除 - OpenClaw 使用 openclaw.json 和環境變數
 
 run_onboard_wizard() {
     log_step "运行配置向导..."
@@ -773,13 +773,13 @@ run_onboard_wizard() {
     echo -e "${PURPLE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
-    # 检查是否已有配置
+    # 檢查是否已有配置
     local skip_ai_config=false
     local skip_identity_config=false
     local env_file="$HOME/.openclaw/env"
     
     if [ -f "$env_file" ]; then
-        echo -e "${YELLOW}检测到已有配置！${NC}"
+        echo -e "${YELLOW}檢測到已有配置！${NC}"
         echo ""
         
         # 显示当前模型配置
@@ -794,8 +794,8 @@ run_onboard_wizard() {
             skip_ai_config=true
             log_info "使用现有 AI 配置"
             
-            if confirm "是否测试现有 API 连接？" "y"; then
-                # 从 env 文件读取配置进行测试
+            if confirm "是否測試现有 API 连接？" "y"; then
+                # 从 env 檔案读取配置进行測試
                 source "$env_file"
                 # 获取当前模型
                 AI_MODEL=$(openclaw config get models.default 2>/dev/null | sed 's|.*/||')
@@ -820,20 +820,20 @@ run_onboard_wizard() {
         echo -e "${CYAN}接下来将引导你完成核心配置，包括:${NC}"
         echo "  1. 选择 AI 模型提供商"
         echo "  2. 配置 API 连接"
-        echo "  3. 测试 API 连接"
-        echo "  4. 设置基本身份信息"
+        echo "  3. 測試 API 连接"
+        echo "  4. 设置基本身份資訊"
         echo ""
     fi
     
     # AI 配置
     if [ "$skip_ai_config" = false ]; then
         setup_ai_provider
-        # 先配置 OpenClaw（设置环境变量和自定义 provider），然后再测试
+        # 先配置 OpenClaw（设置環境變數和自定义 provider），然后再測試
         configure_openclaw_model
         test_api_connection
     else
-        # 即使跳过配置，也可选择测试连接
-        if confirm "是否测试现有 API 连接？" "y"; then
+        # 即使跳过配置，也可选择測試连接
+        if confirm "是否測試现有 API 连接？" "y"; then
             test_api_connection
         fi
     fi
@@ -842,7 +842,7 @@ run_onboard_wizard() {
     if [ "$skip_identity_config" = false ]; then
         setup_identity
     else
-        # 初始化渠道配置变量
+        # 初始化渠道配置變數
         TELEGRAM_ENABLED="false"
         DISCORD_ENABLED="false"
         SHELL_ENABLED="false"
@@ -868,9 +868,9 @@ setup_ai_provider() {
     echo "  6) 🔄 OpenRouter (多模型网关)"
     echo "  7) ⚡ Groq (超快推理)"
     echo "  8) 🌬️ Mistral AI"
-    echo "  9) 🟠 Ollama (本地模型)"
+    echo "  9) 🟠 Ollama (本機模型)"
     echo ""
-    echo -e "${GRAY}提示: 支持自定义 API 地址（通过 openclaw.json 配置自定义 Provider）${NC}"
+    echo -e "${GRAY}提示: 支援自定义 API 地址（通过 openclaw.json 配置自定义 Provider）${NC}"
     echo ""
     echo -en "${YELLOW}请选择 AI 提供商 [1-9] (默认: 1): ${NC}"; read ai_choice < "$TTY_INPUT"
     ai_choice=${ai_choice:-1}
@@ -884,10 +884,10 @@ setup_ai_provider() {
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方 API): ${NC}"; read BASE_URL < "$TTY_INPUT"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo "选择模型:"
-            echo "  1) claude-sonnet-4-5-20250929 (推荐)"
+            echo "  1) claude-sonnet-4-5-20250929 (推薦)"
             echo "  2) claude-opus-4-5-20251101 (最强)"
             echo "  3) claude-haiku-4-5-20251001 (快速)"
             echo "  4) claude-sonnet-4-20250514 (上一代)"
@@ -897,7 +897,7 @@ setup_ai_provider() {
                 2) AI_MODEL="claude-opus-4-5-20251101" ;;
                 3) AI_MODEL="claude-haiku-4-5-20251001" ;;
                 4) AI_MODEL="claude-sonnet-4-20250514" ;;
-                5) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                5) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="claude-sonnet-4-5-20250929" ;;
             esac
             ;;
@@ -909,10 +909,10 @@ setup_ai_provider() {
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方 API): ${NC}"; read BASE_URL < "$TTY_INPUT"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo "选择模型:"
-            echo "  1) gpt-5 (推荐)"
+            echo "  1) gpt-5 (推薦)"
             echo "  2) gpt-5-mini (经济)"
             echo "  3) gpt-4o"
             echo "  4) gpt-4o-mini"
@@ -922,7 +922,7 @@ setup_ai_provider() {
                 2) AI_MODEL="gpt-5-mini" ;;
                 3) AI_MODEL="gpt-4o" ;;
                 4) AI_MODEL="gpt-4o-mini" ;;
-                5) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                5) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="gpt-5" ;;
             esac
             # 如果使用自定义 API 地址，询问 API 类型
@@ -949,10 +949,10 @@ setup_ai_provider() {
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方 API): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"https://api.deepseek.com"}
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo "选择模型:"
-            echo "  1) deepseek-chat (V3.2, 推荐)"
+            echo "  1) deepseek-chat (V3.2, 推薦)"
             echo "  2) deepseek-reasoner (R1, 推理)"
             echo "  3) deepseek-coder"
             echo "  4) 自定义模型名称"
@@ -960,7 +960,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="deepseek-reasoner" ;;
                 3) AI_MODEL="deepseek-coder" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="deepseek-chat" ;;
             esac
             ;;
@@ -973,10 +973,10 @@ setup_ai_provider() {
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方 API): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"https://api.moonshot.cn/v1"}
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo "选择模型:"
-            echo "  1) moonshot-v1-auto (自动, 推荐)"
+            echo "  1) moonshot-v1-auto (自動, 推薦)"
             echo "  2) moonshot-v1-8k"
             echo "  3) moonshot-v1-32k"
             echo "  4) moonshot-v1-128k"
@@ -986,7 +986,7 @@ setup_ai_provider() {
                 2) AI_MODEL="moonshot-v1-8k" ;;
                 3) AI_MODEL="moonshot-v1-32k" ;;
                 4) AI_MODEL="moonshot-v1-128k" ;;
-                5) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                5) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="moonshot-v1-auto" ;;
             esac
             ;;
@@ -996,12 +996,12 @@ setup_ai_provider() {
             echo -e "${CYAN}配置 Google Gemini${NC}"
             echo -e "${GRAY}获取 API Key: https://aistudio.google.com/apikey${NC}"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方): ${NC}"; read BASE_URL < "$TTY_INPUT"
             echo ""
             echo "选择模型:"
-            echo "  1) gemini-2.0-flash (推荐)"
+            echo "  1) gemini-2.0-flash (推薦)"
             echo "  2) gemini-1.5-pro"
             echo "  3) gemini-1.5-flash"
             echo "  4) 自定义"
@@ -1009,7 +1009,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="gemini-1.5-pro" ;;
                 3) AI_MODEL="gemini-1.5-flash" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="gemini-2.0-flash" ;;
             esac
             ;;
@@ -1019,13 +1019,13 @@ setup_ai_provider() {
             echo -e "${CYAN}配置 OpenRouter${NC}"
             echo -e "${GRAY}获取 API Key: https://openrouter.ai/${NC}"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"https://openrouter.ai/api/v1"}
             echo ""
             echo "选择模型:"
-            echo "  1) anthropic/claude-sonnet-4 (推荐)"
+            echo "  1) anthropic/claude-sonnet-4 (推薦)"
             echo "  2) openai/gpt-4o"
             echo "  3) google/gemini-pro-1.5"
             echo "  4) 自定义"
@@ -1033,7 +1033,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="openai/gpt-4o" ;;
                 3) AI_MODEL="google/gemini-pro-1.5" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="anthropic/claude-sonnet-4" ;;
             esac
             ;;
@@ -1043,13 +1043,13 @@ setup_ai_provider() {
             echo -e "${CYAN}配置 Groq${NC}"
             echo -e "${GRAY}获取 API Key: https://console.groq.com/${NC}"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"https://api.groq.com/openai/v1"}
             echo ""
             echo "选择模型:"
-            echo "  1) llama-3.3-70b-versatile (推荐)"
+            echo "  1) llama-3.3-70b-versatile (推薦)"
             echo "  2) llama-3.1-8b-instant"
             echo "  3) mixtral-8x7b-32768"
             echo "  4) 自定义"
@@ -1057,7 +1057,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="llama-3.1-8b-instant" ;;
                 3) AI_MODEL="mixtral-8x7b-32768" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="llama-3.3-70b-versatile" ;;
             esac
             ;;
@@ -1067,13 +1067,13 @@ setup_ai_provider() {
             echo -e "${CYAN}配置 Mistral AI${NC}"
             echo -e "${GRAY}获取 API Key: https://console.mistral.ai/${NC}"
             echo ""
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             echo ""
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"https://api.mistral.ai/v1"}
             echo ""
             echo "选择模型:"
-            echo "  1) mistral-large-latest (推荐)"
+            echo "  1) mistral-large-latest (推薦)"
             echo "  2) mistral-small-latest"
             echo "  3) codestral-latest"
             echo "  4) 自定义"
@@ -1081,7 +1081,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="mistral-small-latest" ;;
                 3) AI_MODEL="codestral-latest" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="mistral-large-latest" ;;
             esac
             ;;
@@ -1089,7 +1089,7 @@ setup_ai_provider() {
             AI_PROVIDER="ollama"
             AI_KEY=""
             echo ""
-            echo -e "${CYAN}配置 Ollama 本地模型${NC}"
+            echo -e "${CYAN}配置 Ollama 本機模型${NC}"
             echo ""
             echo -en "${YELLOW}Ollama 地址 (默认: http://localhost:11434): ${NC}"; read BASE_URL < "$TTY_INPUT"
             BASE_URL=${BASE_URL:-"http://localhost:11434"}
@@ -1103,7 +1103,7 @@ setup_ai_provider() {
             case $model_choice in
                 2) AI_MODEL="llama3:70b" ;;
                 3) AI_MODEL="mistral" ;;
-                4) echo -en "${YELLOW}输入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
+                4) echo -en "${YELLOW}輸入模型名称: ${NC}"; read AI_MODEL < "$TTY_INPUT" ;;
                 *) AI_MODEL="llama3" ;;
             esac
             ;;
@@ -1113,7 +1113,7 @@ setup_ai_provider() {
             echo ""
             echo -e "${CYAN}配置 Anthropic Claude${NC}"
             echo -en "${YELLOW}自定义 API 地址 (留空使用官方): ${NC}"; read BASE_URL < "$TTY_INPUT"
-            echo -en "${YELLOW}输入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
+            echo -en "${YELLOW}輸入 API Key: ${NC}"; read AI_KEY < "$TTY_INPUT"
             AI_MODEL="claude-sonnet-4-20250514"
             ;;
     esac
@@ -1125,12 +1125,12 @@ setup_ai_provider() {
     [ -n "$BASE_URL" ] && echo -e "  API 地址: ${WHITE}$BASE_URL${NC}"
 }
 
-# ================================ API 连接测试 ================================
+# ================================ API 连接測試 ================================
 
 test_api_connection() {
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}  第 2 步: 测试 API 连接${NC}"
+    echo -e "${WHITE}  第 2 步: 測試 API 连接${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
@@ -1138,12 +1138,12 @@ test_api_connection() {
     local max_retries=3
     local retry_count=0
     
-    # 确保环境变量已加载
+    # 确保環境變數已加载
     local env_file="$HOME/.openclaw/env"
     [ -f "$env_file" ] && source "$env_file"
     
     if ! check_command openclaw; then
-        echo -e "${YELLOW}OpenClaw 未安装，跳过测试${NC}"
+        echo -e "${YELLOW}OpenClaw 未安裝，跳过測試${NC}"
         return 0
     fi
     
@@ -1153,10 +1153,10 @@ test_api_connection() {
     echo ""
     
     while [ "$test_passed" = false ] && [ $retry_count -lt $max_retries ]; do
-        echo -e "${YELLOW}运行 openclaw agent --local 测试...${NC}"
+        echo -e "${YELLOW}运行 openclaw agent --local 測試...${NC}"
         echo ""
         
-        # 使用 openclaw agent --local 测试（添加超时）
+        # 使用 openclaw agent --local 測試（添加超时）
         local result
         local exit_code
         
@@ -1168,46 +1168,46 @@ test_api_connection() {
             # 如果 exit_code 为空，从 $? 获取（兼容不同 shell）
             [ -z "$exit_code" ] && exit_code=$?
             if [ "$exit_code" = "124" ]; then
-                result="测试超时（30秒）"
+                result="測試超时（30秒）"
             fi
         else
             result=$(openclaw agent --local --to "+1234567890" --message "回复 OK" 2>&1) || true
             exit_code=$?
         fi
         
-        # 过滤掉 Node.js 警告信息和正常的系统日志
+        # 过滤掉 Node.js 警告資訊和正常的系統日志
         result=$(echo "$result" | grep -v "ExperimentalWarning" | grep -v "at emitExperimentalWarning" | grep -v "at ModuleLoader" | grep -v "at callTranslator")
         
         # 保存原始结果用于显示
         local display_result="$result"
         
-        # 过滤掉正常的插件加载日志和 Doctor warnings 用于错误判断
+        # 过滤掉正常的插件加载日志和 Doctor warnings 用于錯誤判断
         local filtered_result=$(echo "$result" | grep -v "\[plugins\]" | grep -v "Doctor warnings" | grep -v "Registered.*tools" | grep -v "State dir migration" | grep -v "^│" | grep -v "^◇" | grep -v "^$")
         
-        # 检查结果是否为空
+        # 檢查结果是否为空
         if [ -z "$filtered_result" ]; then
-            # 如果过滤后为空，但原始结果不为空，可能只是系统日志
+            # 如果过滤后为空，但原始结果不为空，可能只是系統日志
             if [ -n "$display_result" ]; then
-                # 检查是否有实际的 AI 响应内容（不是日志）
+                # 檢查是否有实际的 AI 响应内容（不是日志）
                 if echo "$display_result" | grep -qE "^[^│◇\[\]]"; then
                     filtered_result="$display_result"
                 else
-                    filtered_result="(只有系统日志，没有 AI 响应)"
+                    filtered_result="(只有系統日志，没有 AI 响应)"
                     exit_code=1
                 fi
             else
-                filtered_result="(无输出 - 命令可能立即退出)"
+                filtered_result="(无輸出 - 命令可能立即退出)"
                 exit_code=1
             fi
         fi
         
-        # 判断是否成功：退出码为 0 且没有真正的错误信息
-        # 注意：只匹配真正的错误，排除正常日志
+        # 判断是否成功：退出码为 0 且没有真正的錯誤資訊
+        # 注意：只匹配真正的錯誤，排除正常日志
         if [ $exit_code -eq 0 ] && ! echo "$filtered_result" | grep -qiE "^error:|api error|401|403|Unknown model|超时|Incorrect API|authentication failed"; then
             test_passed=true
-            echo -e "${GREEN}✓ OpenClaw AI 测试成功！${NC}"
+            echo -e "${GREEN}✓ OpenClaw AI 測試成功！${NC}"
             echo ""
-            # 显示 AI 响应（过滤掉空行和系统日志）
+            # 显示 AI 响应（过滤掉空行和系統日志）
             local ai_response=$(echo "$display_result" | grep -v "^$" | grep -v "\[plugins\]" | grep -v "Doctor" | grep -v "^│" | grep -v "^◇" | head -5)
             if [ -n "$ai_response" ]; then
                 echo -e "  ${CYAN}AI 响应:${NC}"
@@ -1215,22 +1215,22 @@ test_api_connection() {
             fi
         else
             retry_count=$((retry_count + 1))
-            echo -e "${RED}✗ OpenClaw AI 测试失败 (退出码: $exit_code)${NC}"
+            echo -e "${RED}✗ OpenClaw AI 測試失败 (退出码: $exit_code)${NC}"
             echo ""
             
-            # 显示过滤后的错误信息（排除正常日志）
+            # 显示过滤后的錯誤資訊（排除正常日志）
             local error_display=$(echo "$filtered_result" | head -5)
-            if [ -n "$error_display" ] && [ "$error_display" != "(只有系统日志，没有 AI 响应)" ]; then
-                echo -e "  ${RED}错误信息:${NC}"
+            if [ -n "$error_display" ] && [ "$error_display" != "(只有系統日志，没有 AI 响应)" ]; then
+                echo -e "  ${RED}錯誤資訊:${NC}"
                 echo "$error_display" | sed 's/^/    /'
             else
                 echo -e "  ${YELLOW}没有收到 AI 响应，可能是 API 配置问题${NC}"
             fi
             echo ""
             
-            # 显示完整原始输出（用于调试）
+            # 显示完整原始輸出（用于调试）
             if [ -n "$display_result" ]; then
-                echo -e "  ${GRAY}完整输出 (前 8 行):${NC}"
+                echo -e "  ${GRAY}完整輸出 (前 8 行):${NC}"
                 echo "$display_result" | head -8 | sed 's/^/    /'
                 echo ""
             fi
@@ -1244,8 +1244,8 @@ test_api_connection() {
                     echo -e "${YELLOW}提示: 模型不被识别，建议运行: openclaw configure --section model${NC}"
                 elif echo "$filtered_result" | grep -qi "401\|Incorrect API key\|authentication"; then
                     echo -e "${YELLOW}提示: API Key 可能不正确${NC}"
-                elif echo "$filtered_result" | grep -qi "只有系统日志"; then
-                    echo -e "${YELLOW}提示: API 可能没有正确响应，请检查 API 地址和模型名称${NC}"
+                elif echo "$filtered_result" | grep -qi "只有系統日志"; then
+                    echo -e "${YELLOW}提示: API 可能没有正确响应，请檢查 API 地址和模型名称${NC}"
                 fi
                 echo ""
                 
@@ -1261,17 +1261,17 @@ test_api_connection() {
     done
     
     if [ "$test_passed" = false ]; then
-        echo -e "${RED}API 连接测试失败${NC}"
+        echo -e "${RED}API 连接測試失败${NC}"
         echo ""
         echo "建议运行以下命令手动配置:"
         echo "  openclaw configure --section model"
         echo "  openclaw doctor"
         echo ""
-        if confirm "是否仍然继续安装？" "y"; then
-            log_warn "跳过连接测试，继续安装..."
+        if confirm "是否仍然继续安裝？" "y"; then
+            log_warn "跳过连接測試，继续安裝..."
             return 0
         else
-            echo "安装已取消"
+            echo "安裝已取消"
             exit 1
         fi
     fi
@@ -1284,7 +1284,7 @@ test_api_connection() {
 setup_identity() {
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}  第 3 步: 设置身份信息${NC}"
+    echo -e "${WHITE}  第 3 步: 设置身份資訊${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
@@ -1303,7 +1303,7 @@ setup_identity() {
     echo -e "  你的称呼: ${WHITE}$USER_NAME${NC}"
     echo -e "  时区: ${WHITE}$TIMEZONE${NC}"
     
-    # 初始化渠道配置变量
+    # 初始化渠道配置變數
     TELEGRAM_ENABLED="false"
     DISCORD_ENABLED="false"
     SHELL_ENABLED="false"
@@ -1314,8 +1314,8 @@ setup_identity() {
 # ================================ 服务管理 ================================
 
 setup_daemon() {
-    if confirm "是否设置开机自启动？" "y"; then
-        log_step "配置系统服务..."
+    if confirm "是否设置开机自啟動？" "y"; then
+        log_step "配置系統服务..."
         
         case "$OS" in
             macos)
@@ -1385,20 +1385,20 @@ EOF
     log_info "LaunchAgent 已配置"
 }
 
-# ================================ 完成安装 ================================
+# ================================ 完成安裝 ================================
 
 print_success() {
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}                    🎉 安装完成！🎉${NC}"
+    echo -e "${GREEN}                    🎉 安裝完成！🎉${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}配置目录:${NC}"
+    echo -e "${WHITE}配置目錄:${NC}"
     echo "  OpenClaw 配置: ~/.openclaw/"
-    echo "  环境变量配置: ~/.openclaw/env"
+    echo "  環境變數配置: ~/.openclaw/env"
     echo ""
     echo -e "${CYAN}常用命令:${NC}"
-    echo "  openclaw gateway start   # 后台启动服务"
+    echo "  openclaw gateway start   # 后台啟動服务"
     echo "  openclaw gateway stop    # 停止服务"
     echo "  openclaw gateway status  # 查看状态"
     echo "  openclaw models status   # 查看模型配置"
@@ -1406,31 +1406,31 @@ print_success() {
     echo "  openclaw doctor          # 诊断问题"
     echo ""
     echo -e "${PURPLE}📚 官方文档: https://clawd.bot/docs${NC}"
-    echo -e "${PURPLE}💬 社区支持: https://github.com/$GITHUB_REPO/discussions${NC}"
+    echo -e "${PURPLE}💬 社区支援: https://github.com/$GITHUB_REPO/discussions${NC}"
     echo ""
 }
 
-# 启动 OpenClaw Gateway 服务
+# 啟動 OpenClaw Gateway 服务
 start_openclaw_service() {
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}           🚀 启动 OpenClaw 服务${NC}"
+    echo -e "${WHITE}           🚀 啟動 OpenClaw 服务${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
-    # 加载环境变量
+    # 加载環境變數
     local env_file="$HOME/.openclaw/env"
     if [ -f "$env_file" ]; then
         source "$env_file"
-        log_info "已加载环境变量"
+        log_info "已加载環境變數"
     fi
     
-    # 使用端口检测判断是否已有服务在运行（更可靠）
+    # 使用端口檢測判断是否已有服务在运行（更可靠）
     local existing_pid=$(lsof -ti :18789 2>/dev/null | head -1)
     if [ -n "$existing_pid" ]; then
         log_warn "OpenClaw Gateway 已在运行 (PID: $existing_pid)"
         echo ""
-        if confirm "是否重启服务？" "y"; then
+        if confirm "是否重啟服务？" "y"; then
             openclaw gateway stop 2>/dev/null || true
             sleep 2
         else
@@ -1438,8 +1438,8 @@ start_openclaw_service() {
         fi
     fi
     
-    # 后台启动 Gateway（使用 setsid 完全脱离终端）
-    log_step "正在后台启动 Gateway..."
+    # 后台啟動 Gateway（使用 setsid 完全脱离终端）
+    log_step "正在后台啟動 Gateway..."
     
     if command -v setsid &> /dev/null; then
         if [ -f "$env_file" ]; then
@@ -1457,15 +1457,15 @@ start_openclaw_service() {
         disown 2>/dev/null || true
     fi
     
-    # 等待服务启动
+    # 等待服务啟動
     sleep 3
     
-    # 使用端口检测判断服务是否启动成功（更可靠）
+    # 使用端口檢測判断服务是否啟動成功（更可靠）
     local gateway_pid=$(lsof -ti :18789 2>/dev/null | head -1)
     if [ -n "$gateway_pid" ]; then
         echo ""
         echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${GREEN}           ✓ OpenClaw Gateway 已启动！(PID: $gateway_pid)${NC}"
+        echo -e "${GREEN}           ✓ OpenClaw Gateway 已啟動！(PID: $gateway_pid)${NC}"
         echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
         echo ""
         echo -e "  ${CYAN}查看状态:${NC} openclaw gateway status"
@@ -1474,10 +1474,10 @@ start_openclaw_service() {
         echo ""
         log_info "OpenClaw 现在可以接收消息了！"
     else
-        log_error "Gateway 启动失败"
+        log_error "Gateway 啟動失败"
         echo ""
         echo -e "${YELLOW}请查看日志: tail -f /tmp/openclaw-gateway.log${NC}"
-        echo -e "${YELLOW}或手动启动: source ~/.openclaw/env && openclaw gateway${NC}"
+        echo -e "${YELLOW}或手动啟動: source ~/.openclaw/env && openclaw gateway${NC}"
     fi
 }
 
@@ -1490,11 +1490,11 @@ run_config_menu() {
     
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}           🔧 启动配置菜单${NC}"
+    echo -e "${WHITE}           🔧 啟動配置菜单${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     
-    # 检查本地是否已有配置菜单
+    # 檢查本機是否已有配置菜单
     local has_local_menu=false
     if [ -f "$local_config_menu" ]; then
         has_local_menu=true
@@ -1504,9 +1504,9 @@ run_config_menu() {
         menu_script="$config_menu_path"
     fi
     
-    # 如果本地已有配置菜单，询问是否更新
+    # 如果本機已有配置菜单，询问是否更新
     if [ "$has_local_menu" = true ]; then
-        log_info "检测到本地配置菜单: $menu_script"
+        log_info "檢測到本機配置菜单: $menu_script"
         echo ""
         if confirm "是否从 GitHub 更新到最新版本？" "n"; then
             log_step "从 GitHub 下载最新配置菜单..."
@@ -1517,13 +1517,13 @@ run_config_menu() {
                 menu_script="$config_menu_path"
             else
                 rm -f "$config_menu_path.tmp" 2>/dev/null
-                log_warn "下载失败，继续使用本地版本"
+                log_warn "下载失败，继续使用本機版本"
             fi
         else
-            log_info "使用本地配置菜单"
+            log_info "使用本機配置菜单"
         fi
     else
-        # 本地没有配置菜单，从 GitHub 下载
+        # 本機没有配置菜单，从 GitHub 下载
         log_step "从 GitHub 下载配置菜单..."
         if curl -fsSL "$GITHUB_RAW_URL/config-menu.sh" -o "$config_menu_path.tmp"; then
             mv "$config_menu_path.tmp" "$config_menu_path"
@@ -1542,7 +1542,7 @@ run_config_menu() {
     # 确保有执行权限
     chmod +x "$menu_script" 2>/dev/null || true
     
-    # 启动配置菜单（使用 /dev/tty 确保交互正常）
+    # 啟動配置菜单（使用 /dev/tty 确保交互正常）
     echo ""
     if [ -e /dev/tty ]; then
         bash "$menu_script" < /dev/tty
@@ -1558,11 +1558,11 @@ main() {
     print_banner
     
     echo -e "${YELLOW}⚠️  警告: OpenClaw 需要完全的计算机权限${NC}"
-    echo -e "${YELLOW}    不建议在主要工作电脑上安装，建议使用专用服务器或虚拟机${NC}"
+    echo -e "${YELLOW}    不建议在主要工作电脑上安裝，建议使用专用服务器或虚拟机${NC}"
     echo ""
     
-    if ! confirm "是否继续安装？"; then
-        echo "安装已取消"
+    if ! confirm "是否继续安裝？"; then
+        echo "安裝已取消"
         exit 0
     fi
     
@@ -1576,28 +1576,28 @@ main() {
     setup_daemon
     print_success
     
-    # 询问是否启动服务
-    if confirm "是否现在启动 OpenClaw 服务？" "y"; then
+    # 询问是否啟動服务
+    if confirm "是否现在啟動 OpenClaw 服务？" "y"; then
         start_openclaw_service
     else
         echo ""
-        echo -e "${CYAN}稍后可以通过以下命令启动服务:${NC}"
+        echo -e "${CYAN}稍后可以通过以下命令啟動服务:${NC}"
         echo "  source ~/.openclaw/env && openclaw gateway"
         echo ""
     fi
     
-    # 推荐桌面版
+    # 推薦桌面版
     echo ""
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${WHITE}           🖥️ 推荐：OpenClaw Manager 桌面版${NC}"
+    echo -e "${WHITE}           🖥️ 推薦：OpenClaw Manager 桌面版${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${WHITE}如果你更喜欢图形界面，推荐下载 OpenClaw Manager 桌面应用：${NC}"
+    echo -e "${WHITE}如果你更喜欢图形界面，推薦下载 OpenClaw Manager 桌面应用：${NC}"
     echo ""
     echo -e "  🎨 ${CYAN}现代化 UI${NC} - 基于 Tauri 2.0 + React + Rust 构建"
     echo -e "  📊 ${CYAN}实时监控${NC} - 仪表盘查看服务状态、内存、运行时间"
     echo -e "  🔧 ${CYAN}可视化配置${NC} - AI 模型、消息渠道一键配置"
-    echo -e "  💻 ${CYAN}跨平台${NC} - 支持 macOS、Windows、Linux"
+    echo -e "  💻 ${CYAN}跨平台${NC} - 支援 macOS、Windows、Linux"
     echo ""
     echo -e "  👉 ${PURPLE}下载地址: https://github.com/miaoxworld/openclaw-manager${NC}"
     echo ""
@@ -1608,7 +1608,7 @@ main() {
     echo -e "${WHITE}           📝 配置菜单（命令行版）${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo -e "${GRAY}配置菜单支持: 渠道配置、身份设置、安全配置、服务管理等${NC}"
+    echo -e "${GRAY}配置菜单支援: 渠道配置、身份设置、安全配置、服务管理等${NC}"
     echo ""
     echo -e "${WHITE}💡 下次可以直接运行配置菜单:${NC}"
     echo -e "   ${CYAN}bash ./config-menu.sh${NC}"
@@ -1623,7 +1623,7 @@ main() {
     fi
     
     echo ""
-    echo -e "${GREEN}🦞 OpenClaw 安装完成！祝你使用愉快！${NC}"
+    echo -e "${GREEN}🦞 OpenClaw 安裝完成！祝你使用愉快！${NC}"
     echo ""
 }
 
